@@ -1,16 +1,18 @@
 from crewai import Task
 
+
 class TaskFactory:
     def __init__(self, agents):
         self.agents = agents
 
     def get_design_task(self) -> Task:
         return Task(
-            description="""Create a technical design document for {topic}. 
-            CRITICAL: You MUST use the 'write_file' tool to save this design as 'design_doc.md'. 
-            Do not just print it; you must call the tool.""",
-            expected_output="A saved design document in output/design_doc.md",
-            agent=self.agents['architect']
+            description="""Create a technical design document for {topic}.
+            Your final answer must be the complete design document in Markdown.""",
+            expected_output="The complete technical design document in Markdown",
+            agent=self.agents['architect'],
+            # CrewAI saves the final answer itself; small local models often skip tool calls.
+            output_file="output/design_doc.md",
         )
 
     def get_dev_task(self) -> Task:

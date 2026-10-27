@@ -10,7 +10,8 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 
 - Install: `poetry install`
 - Run: `poetry run run-agents` (interactive prompt; requires LM Studio at `LLM_BASE_URL`)
-- Tests and lint: none configured yet. If you add them, prefer `pytest` and `ruff`, and update this file.
+- Test: `poetry run pytest` (no LLM needed)
+- Lint: `poetry run ruff check src tests`
 
 ## Layout
 
@@ -18,7 +19,9 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 - `src/agent_framework/engine.py`: `AgenticEngine`, env setup, task chaining, `Crew` kickoff
 - `src/agent_framework/agents.py`: `AgentFactory` (`get_architect`/`get_developer`/`get_qa`)
 - `src/agent_framework/tasks.py`: `TaskFactory` (`get_design_task`/`get_dev_task`/`get_qa_task`)
-- `src/agent_framework/tools.py`: `FileTools.write_file`
+- `src/agent_framework/config.py`: `LLMConfig`, `load_llm_config` (`LLM_TOKEN` > `LLM_API_KEY`)
+- `src/agent_framework/tools.py`: `safe_write` + `FileTools.write_file`
+- `tests/`: pytest suite
 - `output/`: generated artifacts (gitignored)
 
 ## Conventions
@@ -27,7 +30,8 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 - Task descriptions use `{topic}` placeholders, filled by `crew.kickoff(inputs=...)`.
 - Tools use the `@tool` decorator from `crewai.tools`.
 - Model strings use the LiteLLM form `openai/<model>`.
-- LLM connection settings reach CrewAI through the `OPENAI_API_BASE` and `OPENAI_API_KEY` env vars, which `engine.py` sets. `llm_config["base_url"]` and `llm_config["api_key"]` are currently unused.
+- Agents get an explicit `crewai.LLM` built from `LLMConfig`; `engine.py` also sets `OPENAI_API_BASE`/`OPENAI_API_KEY` for CrewAI internals.
+- `main.py` calls `load_dotenv(override=True)`: `.env` wins over shell exports.
 - All agent file output must go under `output/`.
 
 ## Rules
@@ -38,5 +42,5 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 
 ## Gotchas
 
-- `write_file` doesn't guard against `../` paths.
+- Small local models may skip tool calls; prefer `Task(output_file=...)` for must-have artifacts.
 - The `pyproject.toml` description ("code generation") doesn't match the current Dockerfile-focused tasks.
