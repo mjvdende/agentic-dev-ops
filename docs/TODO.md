@@ -14,6 +14,7 @@ Suggested improvements and quick fixes. Check items off as they land and update 
 ## Test project
 
 - [x] `examples/sample-app` with documented deliberate flaws (ADR 0005)
+- [x] `score-audit` scorer against KNOWN_ISSUES
 - [ ] Smoke test marked `@pytest.mark.llm` (skipped by default) checking the audit finds known flaws
 
 ## Track 1: OpenCode + LM Studio
@@ -22,9 +23,10 @@ Suggested improvements and quick fixes. Check items off as they land and update 
 - [x] Subagents in `.opencode/agent/`: `architect`, `developer`, `security-qa` (reviewers read-only)
 - [x] `/audit` command running the subagents on `examples/sample-app`
 - [x] README how-to
-- [ ] e4b vs 26b vs `qwen/qwen3-coder-30b` comparison on `/audit`
-- [ ] Fix: developer subagent reports changes but writes no files (check `edit` permission pattern / force write)
-- [ ] Fix: security-qa skipped `app.py` (missed known issues #8–#10); make it list and read all source files first
+- [x] e4b vs 26b comparison on `/audit` (docs/TEST_RESULTS.md)
+- [ ] Benchmark `qwen/qwen3-coder-30b` and repeat runs (n≥3)
+- [x] Fix: developer subagent reports changes but writes no files (check `edit` permission pattern / force write)
+- [x] Fix: security-qa skipped `app.py` (missed known issues #8–#10); make it list and read all source files first
 
 ## Track 2: CrewAI growth
 

@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 run-agents = "agent_framework.main:main"
+score-audit = "agent_framework.scoring:main"
 
 [tool.poetry]
 packages = [{include = "agent_framework", from = "src"}]

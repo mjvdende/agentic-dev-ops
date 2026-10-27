@@ -25,7 +25,7 @@ Use a local LLM (LM Studio) to run multiple cooperating agents, via two tracks (
 | `.opencode/agent/*.md` | Subagent prompts and permissions |
 | `.opencode/command/audit.md` | Orchestration prompt |
 
-Measured on `examples/sample-app` with `gemma-4-26b-a4b`: ~5 min, 11/14 known issues found (missed all app-code issues), developer subagent wrote no files. See TODO.
+Benchmarks: `scripts/bench_opencode.sh`, scored by `score-audit` (`scoring.py`). Results in [`TEST_RESULTS.md`](TEST_RESULTS.md).
 
 ## Track 2: CrewAI pipeline
 
