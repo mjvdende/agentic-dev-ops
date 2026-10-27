@@ -18,10 +18,13 @@ Suggested improvements and quick fixes. Check items off as they land and update 
 
 ## Track 1: OpenCode + LM Studio
 
-- [ ] Project-level `opencode.json` with an `lmstudio` provider (`@ai-sdk/openai-compatible`, `http://localhost:1234/v1`, 26b default, e4b optional)
-- [ ] Subagents in `.opencode/agent/`: `architect`, `developer`, `security-qa` (reviewers read-only)
-- [ ] `/audit` command running the subagents on `examples/sample-app`
-- [ ] README how-to + e4b vs 26b comparison notes
+- [x] Project-level `opencode.json` with an `lmstudio` provider (`@ai-sdk/openai-compatible`, `http://localhost:1234/v1`, 26b default, e4b optional)
+- [x] Subagents in `.opencode/agent/`: `architect`, `developer`, `security-qa` (reviewers read-only)
+- [x] `/audit` command running the subagents on `examples/sample-app`
+- [x] README how-to
+- [ ] e4b vs 26b vs `qwen/qwen3-coder-30b` comparison on `/audit`
+- [ ] Fix: developer subagent reports changes but writes no files (check `edit` permission pattern / force write)
+- [ ] Fix: security-qa skipped `app.py` (missed known issues #8–#10); make it list and read all source files first
 
 ## Track 2: CrewAI growth
 

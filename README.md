@@ -38,6 +38,23 @@ poetry run run-agents
 
 Pass the topic as an argument (add `-v` for full agent logs) (`poetry run run-agents "A Flask hello-world API"`) or enter it when prompted. Values in `.env` override variables already exported in your shell. Each run prints one progress line per agent and writes to its own folder, `output/<timestamp>-<topic>/`.
 
+## OpenCode + LM Studio (multi-agent audit)
+
+This repo ships a project-level [OpenCode](https://opencode.ai) setup that uses LM Studio as provider:
+
+- `opencode.json`: `lmstudio` provider at `http://localhost:1234/v1`, API key from `LLM_TOKEN`
+- `.opencode/agent/`: subagents `architect`, `security-qa` (read-only) and `developer` (may only write to `output/`)
+- `.opencode/command/audit.md`: `/audit [path]` runs architect → security-qa → developer
+
+`LLM_TOKEN` must be in your shell environment (e.g. `set -a; source .env; set +a`), then:
+
+```bash
+opencode                                   # then type: /audit examples/sample-app
+opencode run --command audit examples/sample-app   # headless
+```
+
+Results: `output/opencode-audit/report.md`. Compare with `examples/sample-app/KNOWN_ISSUES.md`. Restart OpenCode after changing any of these files.
+
 ## How it works
 
 ```

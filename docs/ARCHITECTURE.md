@@ -6,10 +6,28 @@ Current state of the system. Keep this file up to date with every change; record
 
 Use a local LLM (LM Studio) to run multiple cooperating agents, via two tracks (ADR 0002):
 
-1. **OpenCode + LM Studio subagents**: *planned, not built yet.*
-2. **CrewAI pipeline**: built, described below.
+1. **OpenCode + LM Studio subagents**: interactive, tool-using (below).
+2. **CrewAI pipeline**: batch, no tools (below).
 
-## CrewAI pipeline
+## Track 1: OpenCode + LM Studio
+
+```
+/audit [path]   (.opencode/command/audit.md, primary agent: build)
+   ├─ task → architect    (read-only)  project summary
+   ├─ task → security-qa  (read-only)  findings table
+   ├─ task → developer    (edit only output/**)  hardened files
+   └─ build writes output/opencode-audit/report.md
+```
+
+| File | Role |
+|---|---|
+| `opencode.json` | `lmstudio` provider (`@ai-sdk/openai-compatible`, `http://localhost:1234/v1`, key `{env:LLM_TOKEN}`), models, per-agent model = 26b |
+| `.opencode/agent/*.md` | Subagent prompts and permissions |
+| `.opencode/command/audit.md` | Orchestration prompt |
+
+Measured on `examples/sample-app` with `gemma-4-26b-a4b`: ~5 min, 11/14 known issues found (missed all app-code issues), developer subagent wrote no files. See TODO.
+
+## Track 2: CrewAI pipeline
 
 ```
 run-agents [--verbose] "<topic>"

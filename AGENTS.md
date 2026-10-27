@@ -15,6 +15,8 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 
 ## Layout
 
+- `opencode.json`, `.opencode/agent/`, `.opencode/command/`: OpenCode + LM Studio track (`/audit`)
+
 - `src/agent_framework/main.py`: entry point (`run-agents` script)
 - `src/agent_framework/engine.py`: `AgenticEngine`, env setup, task chaining, `Crew` kickoff
 - `src/agent_framework/agents.py`: `AgentFactory` (`get_architect`/`get_developer`/`get_qa`)
