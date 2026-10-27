@@ -1,0 +1,19 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u admin -p SuperSecret123 registry.example.com
+    - docker build -t registry.example.com/sample-app:latest .
+    - docker push registry.example.com/sample-app:latest
+
+deploy:
+  stage: deploy
+  script:
+    - curl -s https://example.com/install.sh | bash
+    - ./deploy.sh
