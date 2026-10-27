@@ -14,31 +14,33 @@ Benchmark log for both tracks against `examples/sample-app` (14 known issues, se
 | OpenCode `/audit` | gemma-4-26b-a4b | v2 (fixed prompts) | 323s | 11/14 | 79% | 4 | no |
 | OpenCode `/audit` | gemma-4-e4b | v2 | 1451s | 4/14 | 29% | 2 | no |
 | OpenCode `/audit` | qwen3-coder-30b | v2 | aborted | – | – | – | – |
+| CrewAI `agents run audit` | gemma-4-26b-a4b | max_tokens 2048 | failed (step 3) | 13/14 | 93% | 0 (empty LLM answer) | no |
+| CrewAI `agents run audit` | gemma-4-26b-a4b | max_tokens 4096 | 136s | 13/14 | 93% | 1 (Dockerfile) | no |
 | CrewAI `run-agents` (topic) | gemma-4-e4b | output_file | 197s | n/a | – | 3 artifacts | – |
 | CrewAI `run-agents` (topic) | gemma-4-26b-a4b | output_file | 188s | n/a | – | 3 artifacts | – |
 
-CrewAI runs generate from a topic (not an audit), so they are not scored yet. That arrives with the CrewAI `audit` pipeline.
+CrewAI `generate` runs work from a topic and are not scored. CrewAI `audit` reports are scored from `security_report.md`.
 
 ## Per-issue detection (OpenCode `/audit`)
 
-| # | Area | Issue | Severity | 26b v1 | 26b v2 | e4b v2 |
-|---:|---|---|---|:---:|:---:|:---:|
-| 1 | Dockerfile | `python:latest` base | Medium | ✓ | ✓ | |
-| 2 | Dockerfile | Secret in `ENV` | High | ✓ | ✓ | ✓ |
-| 3 | Dockerfile | `ADD` / no `.dockerignore` | Medium | ✓ | ✓ | |
-| 4 | Dockerfile | Runs as root | High | ✓ | ✓ | |
-| 5 | Dockerfile | apt bloat | Low | ✓ | ✓ | ✓ |
-| 6 | Dockerfile | pip cache / unpinned deps | Medium | ✓ | ✓ | |
-| 7 | Dockerfile | Port 22 / CMD / no HEALTHCHECK | Medium | ✓ | ✓ | ✓ |
-| 8 | app.py | Command injection | Critical | | ✓ | ✓ |
-| 9 | app.py | `debug=True` | Critical | | ✓ | |
-| 10 | app.py | `changeme` default token | Medium | | | |
-| 11 | CI | Hardcoded registry password | High | ✓ | ✓ | |
-| 12 | CI | `latest` tags | Medium | ✓ | | |
-| 13 | CI | `curl \| bash` | High | ✓ | ✓ | |
-| 14 | CI | No test/scan stage | Medium | ✓ | | |
-| | | **Critical found** | | 0/2 | 2/2 | 1/2 |
-| | | **High found** | | 4/4 | 4/4 | 1/4 |
+| # | Area | Issue | Severity | OC 26b v1 | OC 26b v2 | OC e4b v2 | CrewAI 26b |
+|---:|---|---|---|:---:|:---:|:---:|:---:|
+| 1 | Dockerfile | `python:latest` base | Medium | ✓ | ✓ | | ✓ |
+| 2 | Dockerfile | Secret in `ENV` | High | ✓ | ✓ | ✓ | ✓ |
+| 3 | Dockerfile | `ADD` / no `.dockerignore` | Medium | ✓ | ✓ | | ✓ |
+| 4 | Dockerfile | Runs as root | High | ✓ | ✓ | | ✓ |
+| 5 | Dockerfile | apt bloat | Low | ✓ | ✓ | ✓ | ✓ |
+| 6 | Dockerfile | pip cache / unpinned deps | Medium | ✓ | ✓ | | ✓ |
+| 7 | Dockerfile | Port 22 / CMD / no HEALTHCHECK | Medium | ✓ | ✓ | ✓ | ✓ |
+| 8 | app.py | Command injection | Critical | | ✓ | ✓ | ✓ |
+| 9 | app.py | `debug=True` | Critical | | ✓ | | ✓ |
+| 10 | app.py | `changeme` default token | Medium | | | | ✓ |
+| 11 | CI | Hardcoded registry password | High | ✓ | ✓ | |  |
+| 12 | CI | `latest` tags | Medium | ✓ | | | ✓ |
+| 13 | CI | `curl \| bash` | High | ✓ | ✓ | | ✓ |
+| 14 | CI | No test/scan stage | Medium | ✓ | | | ✓ |
+| | | **Critical found** | | 0/2 | 2/2 | 1/2 | 2/2 |
+| | | **High found** | | 4/4 | 4/4 | 1/4 | 3/4 |
 
 ## Prompt versions
 
@@ -53,8 +55,11 @@ CrewAI runs generate from a topic (not an audit), so they are not scored yet. Th
 - The permission guard worked in every run: the target was never modified.
 - Benchmarks take 5–25 min per model; the qwen3-coder-30b run was aborted for time.
 
+- **CrewAI `audit` beat OpenCode** on the same 26b model: 13/14 in 136s vs 11/14 in ~320s. Inlining the files removes all tool calls, so the model can't skip a file and spends no turns navigating. Trade-off: no agentic exploration, so it only scales to small projects.
+- At `max_tokens=2048` the 3rd step returned an empty answer (Gemma reasoning consumed the budget); 4096 fixed it.
+
 ## Open
 
 - Run qwen3-coder-30b (`scripts/bench_opencode.sh qwen/qwen3-coder-30b`).
 - Repeat runs (n≥3) per model to measure variance.
-- Score the CrewAI `audit` pipeline once it exists.
+- Repeat CrewAI `audit` runs (n≥3) and try e4b there (no tools, so it may do much better than in OpenCode).

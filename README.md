@@ -33,10 +33,18 @@ cp .env.example .env   # then edit values
 ## Usage
 
 ```bash
-poetry run run-agents
+poetry run agents list                                        # available pipelines
+poetry run agents run audit --project examples/sample-app     # audit an existing project
+poetry run agents run generate "A Flask hello-world API"      # design + Dockerfile + audit from a topic
+poetry run agents run audit -p ../other-repo -m google/gemma-4-e4b -v   # other model, full logs
+poetry run score-audit output/<run>/security_report.md        # score against the sample app's known issues
 ```
 
-Pass the topic as an argument (add `-v` for full agent logs) (`poetry run run-agents "A Flask hello-world API"`) or enter it when prompted. Values in `.env` override variables already exported in your shell. Each run prints one progress line per agent and writes to its own folder, `output/<timestamp>-<topic>/`.
+`run-agents "<topic>"` still works as a shortcut for `agents run generate`. Each run prints one progress line per agent and writes to `output/<timestamp>-<pipeline>-<label>/`. Values in `.env` override variables already exported in your shell.
+
+New pipelines are added in `src/agent_framework/pipelines.yaml` (no code needed).
+
+To use the CLI in other repos: `pipx install /path/to/agentic-dev-ops` (untested), then run `agents ...` there. It needs the `LLM_*` variables in that repo's `.env` or your shell, and writes to `./output/`.
 
 ## OpenCode + LM Studio (multi-agent audit)
 
@@ -57,16 +65,7 @@ Results: `output/opencode-audit/report.md`. Compare with `examples/sample-app/KN
 
 ## How it works
 
-```
-src/agent_framework/
-  main.py    Entry point: loads .env, prompts for a topic, runs the engine
-  engine.py  AgenticEngine: configures LLM env vars, builds agents/tasks, runs a sequential Crew
-  agents.py  AgentFactory: Architect, Developer and QA agents
-  tasks.py   TaskFactory: design, dev and QA tasks (templated with {topic})
-  config.py  LLMConfig + load_llm_config (env -> config)
-```
-
-Tasks are chained via context: design → dev → qa. LLM connection settings reach CrewAI/LiteLLM through the `OPENAI_API_BASE` and `OPENAI_API_KEY` environment variables set in `engine.py`.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Benchmarks: [`docs/TEST_RESULTS.md`](docs/TEST_RESULTS.md).
 
 ## Development
 
@@ -77,7 +76,8 @@ poetry run ruff check src tests
 
 ## Known limitations
 
-- Runs take ~3 min on `gemma-4-26b-a4b` locally.
+- Runs take 2–5 min on `gemma-4-26b-a4b` locally.
+- `audit` inlines all project files (~60 KB cap), so it suits small projects.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/adr/`](docs/adr/) and [`docs/TODO.md`](docs/TODO.md). `examples/sample-app/` is a deliberately flawed test target.
 

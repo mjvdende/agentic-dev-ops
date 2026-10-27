@@ -5,7 +5,7 @@ from dataclasses import dataclass
 DEFAULT_BASE_URL = "http://localhost:1234/v1"
 DEFAULT_API_KEY = "lm-studio"
 DEFAULT_MODEL = "google/gemma-4-26b-a4b"
-DEFAULT_MAX_TOKENS = 2048
+DEFAULT_MAX_TOKENS = 4096
 
 
 @dataclass(frozen=True)

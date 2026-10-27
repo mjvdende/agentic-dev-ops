@@ -10,11 +10,13 @@ dependencies = [
     "crewai",
     "langchain-openai",
     "python-dotenv",
-    "litellm"
+    "litellm",
+    "pyyaml (>=6.0.3,<7.0.0)"
 ]
 
 [project.scripts]
-run-agents = "agent_framework.main:main"
+agents = "agent_framework.main:main"
+run-agents = "agent_framework.main:legacy_main"
 score-audit = "agent_framework.scoring:main"
 
 [tool.poetry]

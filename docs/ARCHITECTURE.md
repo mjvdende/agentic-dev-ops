@@ -27,35 +27,37 @@ Use a local LLM (LM Studio) to run multiple cooperating agents, via two tracks (
 
 Benchmarks: `scripts/bench_opencode.sh`, scored by `score-audit` (`scoring.py`). Results in [`TEST_RESULTS.md`](TEST_RESULTS.md).
 
-## Track 2: CrewAI pipeline
+## Track 2: CrewAI pipelines
 
 ```
-run-agents [--verbose] "<topic>"
+agents run <pipeline> [topic] [--project PATH] [--model M] [-v]
    │
 main.py ── load_dotenv(override=True) ── LLMConfig (config.py)
+   │        └─ project pipelines: read_project(PATH) → {project_files}  (project.py)
+registry.py ── pipelines.yaml → Pipeline(steps)            (ADR 0006)
    │
-engine.py  AgenticEngine
-   ├─ AgentFactory (agents.py)  one crewai.LLM shared by 3 agents, no tools
-   ├─ TaskFactory  (tasks.py)   3 tasks, each with output_file
-   └─ Crew(process=sequential, task_callback=progress)
-        design ──context──▶ dockerfile ──context──▶ security audit
-          │                    │                       │
-   output/<run>/design_doc.md  Dockerfile        security_report.md
+engine.py  AgenticEngine.build_crew(pipeline)
+   ├─ AgentFactory.create(step)   one shared crewai.LLM, no tools, max_iter=3
+   ├─ TaskFactory.create(step)    output_file per step, context = earlier steps
+   └─ Crew(sequential, task_callback=Progress) → output/<timestamp>-<pipeline>-<label>/
 ```
+
+| Pipeline | Input | Steps → files |
+|---|---|---|
+| `generate` | topic | design → `design_doc.md`, dockerfile → `Dockerfile`, audit → `security_report.md` |
+| `audit` | `--project PATH` | summary → `summary.md`, findings → `security_report.md`, dockerfile → hardened `Dockerfile` |
 
 | Module | Responsibility |
 |---|---|
-| `main.py` | CLI parsing, progress lines, final summary |
-| `config.py` | `LLMConfig` from env (`LLM_TOKEN` > `LLM_API_KEY`), LiteLLM model string, generation limits |
-| `engine.py` | Builds agents/tasks/crew, creates the per-run output folder, runs it |
-| `agents.py` | `AgentFactory`: Architect, DevOps Engineer, Security QA |
-| `tasks.py` | `TaskFactory`: one task per artifact, results saved via `output_file` (ADR 0003) |
+| `main.py` | CLI (`agents list/run`, `run-agents` alias), progress, summary |
+| `config.py` | `LLMConfig` from env (`LLM_TOKEN` > `LLM_API_KEY`), `max_tokens` (default 4096) |
+| `registry.py` + `pipelines.yaml` | Pipeline definitions and validation |
+| `project.py` | Inline a project's text files (line-numbered, size-capped, skips secrets/answer key) |
+| `engine.py` | Builds and runs the crew per pipeline |
+| `agents.py` / `tasks.py` | Generic factories: one agent + one task per step |
+| `scoring.py` | `score-audit`: score a report against `KNOWN_ISSUES.md` |
 
-### Runtime characteristics
-
-- About one LLM call per task (no tools, `max_iter` bounded). Run time is dominated by local model speed.
-- Each run writes to `output/<YYYYmmdd-HHMMSS>-<slug>/`; nothing is overwritten.
-- Connection: explicit `crewai.LLM(base_url, api_key)`; `OPENAI_API_BASE`/`OPENAI_API_KEY` are also exported for CrewAI internals.
+About one LLM call per step. `audit` on the sample app: ~2.5 min, 13/14 (see [`TEST_RESULTS.md`](TEST_RESULTS.md)).
 
 ## Test target
 

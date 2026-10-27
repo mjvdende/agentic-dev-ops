@@ -30,10 +30,12 @@ Suggested improvements and quick fixes. Check items off as they land and update 
 
 ## Track 2: CrewAI growth
 
-- [ ] Pipeline registry (YAML): `generate` (current) and `audit <path>` (real files)
-- [ ] CLI: `agents run <pipeline> [--project PATH] [--model] [--verbose]`
-- [ ] `pipx install .` so it works from other repos
-- [ ] Unit tests for registry and CLI
+- [x] Pipeline registry (YAML): `generate` and `audit --project PATH` (ADR 0006)
+- [x] CLI: `agents list` / `agents run <pipeline> [--project PATH] [--model] [-v]`
+- [ ] Verify `pipx install .` from other repos (documented, not yet tested)
+- [x] Unit tests for registry and CLI
+- [ ] CrewAI audit: CI hardcoded password (#11) missed once; repeat runs
+- [ ] Large projects: file selection instead of inlining everything
 
 ## Later
 

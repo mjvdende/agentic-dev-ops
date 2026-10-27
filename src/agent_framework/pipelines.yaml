@@ -1,0 +1,71 @@
+# Pipeline registry (ADR 0006). Each pipeline is a sequential chain of steps.
+# A step = one agent + one task; its final answer is saved to `output` (ADR 0003).
+# Placeholders: {topic} (generate) or {project_files}/{project_name} (audit); `context` lists earlier steps.
+
+generate:
+  description: Design, Dockerfile and security audit for a topic.
+  input: topic
+  steps:
+    - name: design
+      role: Software Architect
+      goal: Design {topic}
+      backstory: Pragmatic system designer.
+      task: Write a concise technical design document (max ~400 words) for {topic}.
+      expected_output: The design document in Markdown. No preamble.
+      output: design_doc.md
+    - name: dockerfile
+      role: DevOps Engineer
+      goal: Containerize {topic}
+      backstory: Writes minimal, secure Dockerfiles.
+      task: Write a production-grade, secure Dockerfile for {topic}, following the design.
+      expected_output: Only the Dockerfile contents. No Markdown fences, no explanation.
+      output: Dockerfile
+      context: [design]
+    - name: audit
+      role: Security QA Engineer
+      goal: Audit the Dockerfile for {topic}
+      backstory: Container security expert.
+      task: Security-audit the Dockerfile for {topic}. List each issue with severity and a fix.
+      expected_output: A security report in Markdown. No preamble.
+      output: security_report.md
+      context: [dockerfile]
+
+audit:
+  description: Security audit of an existing project, with a hardened Dockerfile.
+  input: project
+  steps:
+    - name: summary
+      role: Software Architect
+      goal: Understand the project {project_name}
+      backstory: Pragmatic system designer who reports only what is in the files.
+      task: |
+        Summarise this project: components, runtime, dependencies (pinned or not) and deployment.
+        Max ~250 words. Project files:
+
+        {project_files}
+      expected_output: A Markdown summary. No preamble.
+      output: summary.md
+    - name: findings
+      role: Security QA Engineer
+      goal: Find every security issue in {project_name}
+      backstory: Container and application security reviewer.
+      task: |
+        Security-audit every file of this project: Dockerfile, CI config, dependency files AND application code.
+        Check: unpinned/latest images, secrets in ENV or files, running as root, ADD vs COPY, missing .dockerignore,
+        apt/pip caches, unpinned dependencies, unneeded ports, shell-form CMD, dev server in production,
+        missing HEALTHCHECK, command injection (shell=True), debug mode, insecure default secrets,
+        hardcoded CI credentials, curl | bash, missing test/scan stage.
+        Project files:
+
+        {project_files}
+      expected_output: "A Markdown table: | # | File:line | Issue | Severity | Fix |. No preamble."
+      output: security_report.md
+      context: [summary]
+    - name: dockerfile
+      role: DevOps Engineer
+      goal: Harden the Dockerfile of {project_name}
+      backstory: Writes minimal, secure Dockerfiles.
+      task: Write a fixed Dockerfile for {project_name} that resolves every Dockerfile finding.
+      expected_output: Only the Dockerfile contents. No Markdown fences, no explanation.
+      output: Dockerfile
+      context: [findings]
