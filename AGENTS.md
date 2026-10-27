@@ -20,7 +20,6 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 - `src/agent_framework/agents.py`: `AgentFactory` (`get_architect`/`get_developer`/`get_qa`)
 - `src/agent_framework/tasks.py`: `TaskFactory` (`get_design_task`/`get_dev_task`/`get_qa_task`)
 - `src/agent_framework/config.py`: `LLMConfig`, `load_llm_config` (`LLM_TOKEN` > `LLM_API_KEY`)
-- `src/agent_framework/tools.py`: `safe_write` + `FileTools.write_file`
 - `tests/`: pytest suite
 - `output/`: generated artifacts (gitignored)
 
@@ -28,7 +27,7 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 
 - New agents go in `AgentFactory` and new tasks in `TaskFactory`. Wire task dependencies in `engine.py` via `task.context = [...]`.
 - Task descriptions use `{topic}` placeholders, filled by `crew.kickoff(inputs=...)`.
-- Tools use the `@tool` decorator from `crewai.tools`.
+- Agents have no tools; each task's final answer is saved via `Task(output_file=...)` into the per-run folder (ADR 0003).
 - Model strings use the LiteLLM form `openai/<model>`.
 - Agents get an explicit `crewai.LLM` built from `LLMConfig`; `engine.py` also sets `OPENAI_API_BASE`/`OPENAI_API_KEY` for CrewAI internals.
 - `main.py` calls `load_dotenv(override=True)`: `.env` wins over shell exports.
@@ -40,7 +39,13 @@ CrewAI multi-agent PoC using a local LLM via LM Studio (OpenAI-compatible). A us
 - Don't commit anything in `output/`.
 - Python 3.10 – 3.13. Manage dependencies with Poetry (`poetry add`), not pip.
 
+## Docs
+
+- `docs/ARCHITECTURE.md` describes the current state: update it with every architectural change.
+- Record decisions as ADRs in `docs/adr/`; track planned work in `docs/TODO.md`.
+- `examples/sample-app/` contains intentional flaws: never fix them in place.
+
 ## Gotchas
 
-- Small local models may skip tool calls; prefer `Task(output_file=...)` for must-have artifacts.
+- CrewAI strips a leading `/` from `output_file`; keep output paths relative.
 - The `pyproject.toml` description ("code generation") doesn't match the current Dockerfile-focused tasks.

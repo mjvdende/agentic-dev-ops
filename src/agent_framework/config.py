@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 DEFAULT_BASE_URL = "http://localhost:1234/v1"
 DEFAULT_API_KEY = "lm-studio"
-DEFAULT_MODEL = "local-model"
+DEFAULT_MODEL = "google/gemma-4-26b-a4b"
+DEFAULT_MAX_TOKENS = 2048
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,7 @@ class LLMConfig:
     model: str
     base_url: str
     api_key: str
+    max_tokens: int = DEFAULT_MAX_TOKENS
 
     @property
     def litellm_model(self) -> str:
@@ -29,4 +31,5 @@ def load_llm_config(env: Mapping[str, str] | None = None) -> LLMConfig:
         model=env.get("LLM_MODEL_NAME") or DEFAULT_MODEL,
         base_url=env.get("LLM_BASE_URL") or DEFAULT_BASE_URL,
         api_key=env.get("LLM_TOKEN") or env.get("LLM_API_KEY") or DEFAULT_API_KEY,
+        max_tokens=int(env.get("LLM_MAX_TOKENS") or DEFAULT_MAX_TOKENS),
     )

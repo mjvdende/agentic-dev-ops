@@ -28,7 +28,7 @@ cp .env.example .env   # then edit values
 | `LLM_BASE_URL`   | `http://localhost:1234/v1` | OpenAI-compatible API base URL      |
 | `LLM_TOKEN`      | —                          | API token; takes precedence over `LLM_API_KEY` |
 | `LLM_API_KEY`    | `lm-studio`                | Fallback API key                    |
-| `LLM_MODEL_NAME` | `local-model`              | Model identifier loaded in LM Studio |
+| `LLM_MODEL_NAME` | `google/gemma-4-26b-a4b`            | Model identifier loaded in LM Studio |
 
 ## Usage
 
@@ -36,7 +36,7 @@ cp .env.example .env   # then edit values
 poetry run run-agents
 ```
 
-Pass the topic as an argument (`poetry run run-agents "A Flask hello-world API"`) or enter it when prompted. Values in `.env` override variables already exported in your shell. Results are written to `output/`.
+Pass the topic as an argument (add `-v` for full agent logs) (`poetry run run-agents "A Flask hello-world API"`) or enter it when prompted. Values in `.env` override variables already exported in your shell. Each run prints one progress line per agent and writes to its own folder, `output/<timestamp>-<topic>/`.
 
 ## How it works
 
@@ -47,7 +47,6 @@ src/agent_framework/
   agents.py  AgentFactory: Architect, Developer and QA agents
   tasks.py   TaskFactory: design, dev and QA tasks (templated with {topic})
   config.py  LLMConfig + load_llm_config (env -> config)
-  tools.py   write_file tool: writes files under output/, rejects paths escaping it
 ```
 
 Tasks are chained via context: design → dev → qa. LLM connection settings reach CrewAI/LiteLLM through the `OPENAI_API_BASE` and `OPENAI_API_KEY` environment variables set in `engine.py`.
@@ -61,6 +60,7 @@ poetry run ruff check src tests
 
 ## Known limitations
 
-- Small local models sometimes skip tool calls or write extra files; the design doc is saved via `output_file` to be robust.
+- Runs take ~3 min on `gemma-4-26b-a4b` locally.
 
-- Every run overwrites the files in `output/`.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/adr/`](docs/adr/) and [`docs/TODO.md`](docs/TODO.md). `examples/sample-app/` is a deliberately flawed test target.
+
