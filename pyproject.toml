@@ -1,0 +1,26 @@
+[project]
+name = "agentic-dev-ops"
+version = "0.1.0"
+description = "Multi-agent code generation with LM Studio"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai",
+    "langchain-openai",
+    "python-dotenv",
+    "litellm"
+]
+
+[project.scripts]
+run-agents = "agent_framework.main:main"
+
+[tool.poetry]
+packages = [{include = "agent_framework", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+#sk-lm-k1S5Ahr2:0NEMOCeKtqzcuW9oL5I0
